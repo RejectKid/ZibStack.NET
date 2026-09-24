@@ -117,8 +117,8 @@ The Zod file imports and uses those schemas directly:
 import { GeoJSONFeatureSchema, GeoJSONPointSchema } from 'zod-geojson';
 
 export const OrderDtoSchema = z.object({
-    deliveryAreaPoint: GeoJSONPointSchema.nullish(),
-    deliveryAreaFeature: GeoJSONFeatureSchema.nullish(),
+    deliveryAreaPoint: (GeoJSONPointSchema).nullish(),
+    deliveryAreaFeature: (GeoJSONFeatureSchema).nullish(),
 });
 ```
 
@@ -142,6 +142,27 @@ expressions such as `z.string().startsWith('ord_')`. TypeGen still applies the
 property's nullable, optional, read-only, and `PatchField<T>` modifier after the
 override. Other inferred validation constraints are not appended because the
 explicit schema owns validation for that property.
+
+When `ImportFrom` is set, a bare identifier supplies its own import name. For
+compound expressions, specify the exported name explicitly:
+
+```csharp
+[ZodSchema("GeoJSONPointSchema.refine(point => point.coordinates.length >= 2)",
+    ImportFrom = "zod-geojson", Import = "GeoJSONPointSchema")]
+public Point? DeliveryAreaPoint { get; init; }
+
+// Or on a referenced type:
+b.ForType<OrderDto>()
+    .Property(x => x.DeliveryAreaPoint)
+    .ZodSchema("GeoJSONPointSchema.refine(point => point.coordinates.length >= 2)",
+        "zod-geojson", "GeoJSONPointSchema");
+```
+
+TypeGen reports `TG0021` if a compound expression has `ImportFrom` without an
+explicit import name. It aliases external imports when their names clash with a
+generated schema or another module. Override expressions that refer to generated
+schemas are included in import, ordering, and cycle analysis; cyclic references
+are emitted through `z.lazy(...)`.
 
 Imports sharing a module are grouped and deduplicated in both single-file and
 file-per-class output. External schemas also participate normally in

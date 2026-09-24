@@ -356,6 +356,38 @@ public sealed class ZodCompilationTests : IDisposable
             $"tsc failed (exit {exitCode}):{Environment.NewLine}{stdout}{Environment.NewLine}{stderr}");
     }
 
+    [Fact]
+    public async Task CompoundOverride_WithGeneratedReferences_CompilesInSingleFile()
+    {
+        if (_skip) return;
+
+        var model = new SchemaModel();
+        var node = ClsModel("Node", new[] { ("Id", "int", false) });
+        node.Properties.Add(new SchemaProperty
+        {
+            SourceName = "Children", CSharpTypeFullName = "object",
+            ZodSchemaOverride = "z.array(NodeSchema)",
+        });
+        var order = ClsModel("Order", new[] { ("Items", "object", false) });
+        order.Properties[0].ZodSchemaOverride = "z.array(OrderItemSchema).min(1)";
+        var item = ClsModel("OrderItem", new[] { ("Sku", "string", false) });
+        model.Classes.Add(node);
+        model.Classes.Add(order);
+        model.Classes.Add(item);
+        var settings = new GlobalSettings { Zod = { FileLayout = ZodFileLayout.SingleFile } };
+
+        var file = Assert.Single(ZodEmitter.Emit(model, settings));
+        await PrepareWorkspaceAsync();
+        File.WriteAllText(Path.Combine(_tempDir, file.FileName), file.Content);
+        var (exitCode, stdout, stderr) = await RunAsync(
+            "npx",
+            $"-y -p {TscPackageSpec} tsc --noEmit --strict --skipLibCheck --esModuleInterop --target ES2020 --moduleResolution node {file.FileName}",
+            workingDir: _tempDir);
+
+        Assert.True(exitCode == 0,
+            $"tsc failed (exit {exitCode}):{Environment.NewLine}{stdout}{Environment.NewLine}{stderr}{Environment.NewLine}{file.Content}");
+    }
+
     // ── helpers ─────────────────────────────────────────────────────────────
 
     private async Task PrepareWorkspaceAsync(params string[] additionalPackages)

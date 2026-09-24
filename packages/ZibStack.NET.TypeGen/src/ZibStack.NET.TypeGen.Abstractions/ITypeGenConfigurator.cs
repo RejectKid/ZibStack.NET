@@ -238,6 +238,9 @@ public interface IPropertyBuilder<TClass, TProp>
     /// </summary>
     IPropertyBuilder<TClass, TProp> ZodSchema(string schemaExpression, string? importFrom);
 
+    /// <summary>Specify the named export explicitly for a compound schema expression.</summary>
+    IPropertyBuilder<TClass, TProp> ZodSchema(string schemaExpression, string importFrom, string import);
+
     /// <summary>Equivalent to <c>[OpenApiProperty(Description = description)]</c>.</summary>
     IPropertyBuilder<TClass, TProp> OpenApiDescription(string description);
 

@@ -124,10 +124,13 @@ public sealed class TypeGenConfig : ITypeGenConfigurator
 The generated module uses Zod's native factories and compiler:
 
 ```ts
+import { GeoJSONPointSchema } from 'zod-geojson';
+
 export const PaymentSchema = z.compile(z.toZod<Payment>()(z.object({
   cardNumber: z.creditCard(),
   iban: z.iban(),
   publicToken: z.nanoid({ length: 16 }),
+  deliveryPoint: (GeoJSONPointSchema).optional(),
   parent: z.lazy(() => PaymentSchema).optional(),
 })));
 
@@ -147,6 +150,13 @@ b.ForType<Payment>()
 
 The frontend must install any package named by `ImportFrom`; for this example,
 use `npm install zod zod-geojson`.
+
+For a compound expression, name the export explicitly:
+
+```csharp
+[ZodSchema("GeoJSONPointSchema.refine(point => point.coordinates.length >= 2)",
+    ImportFrom = "zod-geojson", Import = "GeoJSONPointSchema")]
+```
 
 ## Docs
 

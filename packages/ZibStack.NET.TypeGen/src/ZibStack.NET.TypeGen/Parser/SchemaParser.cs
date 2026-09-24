@@ -896,6 +896,7 @@ internal static class SchemaParser
             TsImportFrom = ReadNamedStringArg(prop, TsTypeAttr, "ImportFrom"),
             ZodSchemaOverride = ReadStringArg(prop, ZodSchemaAttr, "SchemaExpression"),
             ZodSchemaImportFrom = ReadNamedStringArg(prop, ZodSchemaAttr, "ImportFrom"),
+            ZodSchemaImport = ReadNamedStringArg(prop, ZodSchemaAttr, "Import"),
             OpenApiNameOverride = ReadStringArg(prop, OpenApiSchemaNameAttr, "Name"),
             TsIgnore = HasAttr(prop, TsIgnoreAttr),
             OpenApiIgnore = HasAttr(prop, OpenApiIgnoreAttr),

@@ -32,5 +32,11 @@ public sealed class ZodSchemaAttribute : Attribute
     /// <summary>Optional module specifier supplying named symbols used by the expression.</summary>
     public string? ImportFrom { get; set; }
 
+    /// <summary>
+    /// Named export to import from <see cref="ImportFrom"/>. Required when
+    /// <see cref="SchemaExpression"/> is more than a single identifier.
+    /// </summary>
+    public string? Import { get; set; }
+
     public ZodSchemaAttribute(string schemaExpression) => SchemaExpression = schemaExpression;
 }
